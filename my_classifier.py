@@ -1,4 +1,3 @@
 from ActivityClassify import activity_predict
 
-data = {"Category":"(Self Heal) High CPU utilization","Headline":"cpu is too high"}
-print (activity_predict(data))
+print (activity_predict(Headline='CPU is too high',Category='(Self Heal) High CPU utilization'))
