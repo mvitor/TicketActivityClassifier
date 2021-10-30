@@ -1,3 +1,10 @@
-from ActivityClassify import activity_predict
+from ActivityClassify import TicketActivityPredict
+import pdb
+classifier = TicketActivityPredict()
+#print (vars(classifier))
+#pdb.set_trace()
 
-print (activity_predict(Headline='CPU is too high',Category='(Self Heal) High CPU utilization'))
+#classifier.load_model()
+classifier.predict_text(Headline='CPU is too high',
+                        Category='(Self Heal) High CPU utilization')
+#print (activity_predict(Headline='CPU is too high',Category='(Self Heal) High CPU utilization'))
