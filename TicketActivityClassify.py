@@ -1,7 +1,5 @@
 import os
-
 import pandas
-
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 import json
 import numpy as np
@@ -27,7 +25,7 @@ logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 # self.load_model(*args, **kwargs)
 # It's a dataframe prediction
-# if "Headline"in kwargs:
+# if "ShortDescription"in kwargs:
 #    self.predict_text(*args, **kwargs)
 # else:
 #     self.predict_dataset(*args, **kwargs)
@@ -35,6 +33,7 @@ logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 class TicketActivityPredict:
     def __init__(self, *args, **kwargs):
+        """ Init and Load model """
         self._tokenizer = type("Tokenizer", (), {})
         self.labels = []
         self._model = type("model_from_json", (), {})
@@ -42,9 +41,9 @@ class TicketActivityPredict:
     def activity_predict(self, *args, **kwargs):
         """This function is responsible for loading and model and classification classes and based on the input data it returns one or more predictions"""
         """ Inputs """
-        """         If Headline is a true parameter we consider this as single request classification """
+        """         If ShortDescription is a true parameter we consider this as single request classification """
         # Load Prediction Input file
-        if "Headline" not in kwargs:
+        if "ShortDescription" not in kwargs:
             with open(
                 os.path.join(
                     myapp_config.OUTPUT_PATH, myapp_config.DEFAULT_PREDICT_INPUT_FILE
@@ -54,7 +53,7 @@ class TicketActivityPredict:
                 input_data = json.load(fp)
         else:
             # Single classification
-            headline = [kwargs["Headline"]]
+            short_description = [kwargs["ShortDescription"]]
             # Category is optional
             category = [kwargs.get("Category")]
 
@@ -71,7 +70,7 @@ class TicketActivityPredict:
             self.labels.append(line)
 
         # load json model
-        model_name = kwargs.pop("model_name", "ActivityMap_Cat_Headline")
+        model_name = kwargs.pop("model_name", "Activity_Classifier")
         model_file_name = "model_" + model_name + ".json"
 
         logging.info("Loading model called: " + model_file_name)
@@ -130,16 +129,16 @@ class TicketActivityPredict:
     def predict_text(self, *args, **kwargs):
         """ Individual sample prediction"""
         # Single classification
-        headline = [kwargs["Headline"]]
+        short_description = [kwargs["ShortDescription"]]
         # Category is optional
         category = [kwargs.get("Category")]
-        logging.info("Headline " + str(headline))
+        logging.info("ShortDescription " + str(short_description))
         logging.info("Category " + str(category))
         predictions = []
         scores = []
         top5_pred_probs = []
-        # Headlines
-        x_pred = self._tokenizer.texts_to_matrix(headline, mode="tfidf")
+        # ShortDescriptions
+        x_pred = self._tokenizer.texts_to_matrix(short_description, mode="tfidf")
         # Categorias
         y_pred = self._tokenizer.texts_to_matrix(category, mode="tfidf")
 
@@ -157,7 +156,7 @@ class TicketActivityPredict:
             prob = "%.2f" % round(prob, 2)
             top5_pred_probs.append([prob, predicted_label])
         output = {
-            "headline": headline[0],
+            "short_description": short_description[0],
             "category": category[0],
             "top5_pred_probs": top5_pred_probs,
         }
