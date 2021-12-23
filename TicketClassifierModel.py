@@ -34,34 +34,35 @@ class TicketClassifierModel:
         self.labels = []
         self._model = type("model_from_json", (), {})
         self.accuracy = 0
-        self._train_data = self.load_prepare_dataset(
-            dataset=kwargs.get("training_dataset")
-        )
+        self._train_data = self.load_prepare_dataset(*args, **kwargs)
         # Create model
         if kwargs.get("recreate_model") == True:
             self.labels = self.create_model(myapp_config.MODEL_NAME)
             self.test_data = self.validate_model(*args, **kwargs)
 
-    def load_prepare_dataset(self, dataset, *args, **kwargs):
+    def load_prepare_dataset(self, *args, **kwargs):
         """
         loading dataset from csv and removal of null keys which are mandatory for training:
             TicketShortDesc and Activity
         """
+        dataset=kwargs.get("training_dataset")
         logging.info("Preparing to read csv dataset: " + str(dataset))
-        data = pd.read_csv(os.path.join(myapp_config.DATASETS_PATH, dataset), dtype=str)
+        df = pd.read_csv(os.path.join(myapp_config.DATASETS_PATH, dataset), dtype=str)
 
         logging.info(
-            "DS Shape before ShortDescription and Activity cleanup: " + str(data.shape)
+            "DS Shape before ShortDescription and Activity cleanup: " + str(df.shape)
         )
         drop_if_na = ["ShortDescription", "Activity"]
         for i in range(0, len(drop_if_na)):
             logging.info("Removing nulls from column " + str(drop_if_na[i]))
-            data.dropna(subset=[drop_if_na[i]], inplace=True)
+            df.dropna(subset=[drop_if_na[i]], inplace=True)
         logging.info(
-            "DS Shape after ShortDescription and Activity cleanup: " + str(data.shape)
+            "DS Shape after ShortDescription and Activity cleanup: " + str(df.shape)
         )
-
-        return data
+        logging.info(
+            df.head()
+        )
+        return df
 
     def preprocess_text(self, sen):
         """
@@ -210,7 +211,7 @@ class TicketClassifierModel:
         """
         Load Models and predicts test data using the labels
         """
-        test_data = self.load_prepare_dataset(dataset=kwargs.get("testing_dataset"))
+        test_data = self.load_prepare_dataset(*args, **kwargs)
         labels = self.labels
         # load json and create model
         json_file = open(
